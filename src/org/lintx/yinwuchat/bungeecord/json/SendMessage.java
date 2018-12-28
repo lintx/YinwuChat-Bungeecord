@@ -17,16 +17,19 @@ public class SendMessage {
     private String action = "send_message";
     private String player = "";
     private String message = "";
+    private String server_name = "";
     
-    public SendMessage(String player,String message){
+    public SendMessage(String player,String message,String server_name){
         this.player = player;
         this.message = message;
+        this.server_name = server_name;
     }
     
     public String getJSON(){
         JsonObject json = new JsonObject();
         json.addProperty("action", action);
         json.addProperty("player", player);
+        json.addProperty("server", server_name);
         json.addProperty("message", message);
         json.addProperty("time", new Date().getTime());
         return new Gson().toJson(json);
