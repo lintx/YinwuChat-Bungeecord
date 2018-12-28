@@ -85,7 +85,35 @@ mysql:
     "action":"send_message",
     "time":unix时间戳，单位为毫秒（java/JavaScript时间戳）,
     "player":"玩家名",
+    "server":"服务器名",
     "message":"消息内容"
+}
+```
+4. 玩家登录游戏
+```
+{
+    "action":"player_join",
+    "player":"玩家名",
+    "server":"服务器名（可能为空）",
+    "time":unix时间戳
+}
+```
+5. 玩家退出游戏
+```
+{
+    "action":"player_leave",
+    "player":"玩家名",
+    "server":"服务器名（可能为空）",
+    "time":unix时间戳
+}
+```
+4. 玩家切换服务器
+```
+{
+    "action":"player_switch_server",
+    "player":"玩家名",
+    "server":"服务器名（可能为空）",
+    "time":unix时间戳
 }
 ```
 
@@ -116,6 +144,6 @@ mysql:
 本插件由国内正版Minecraft服务器[YinwuRealm](https://www.yinwurealm.org/)玩家[LinTx](https://mine.ly/LinTx.1)为服务器开发
 
 ### 更新记录
-2018-12-28 插件重构到Bungeecord完成
-2018-12-27 YinwuChat(Bukkit)0.0.1开发完成，测试中发现DeluxeChat无法获取Bungeecord其他服务器的聊天事件，开始将插件重构到Bungeecord插件
-2018-12-25 开始开发YinwuChat，是一个Bukkit插件，需要DeluxeChat和PlaceHolderAPI作为前置插件
+- 2018-12-28 插件重构到Bungeecord完成
+- 2018-12-27 YinwuChat(Bukkit)0.0.1开发完成，测试中发现DeluxeChat无法获取Bungeecord其他服务器的聊天事件，开始将插件重构到Bungeecord插件
+- 2018-12-25 开始开发YinwuChat，是一个Bukkit插件，需要DeluxeChat和PlaceHolderAPI作为前置插件

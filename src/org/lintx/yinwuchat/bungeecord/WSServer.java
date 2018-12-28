@@ -12,7 +12,9 @@ import org.java_websocket.server.WebSocketServer;
 import org.lintx.yinwuchat.bungeecord.json.BaseInputJSON;
 import org.lintx.yinwuchat.bungeecord.json.InputCheckToken;
 import org.lintx.yinwuchat.bungeecord.json.InputMessage;
+import org.lintx.yinwuchat.bungeecord.json.SendMessage;
 import org.lintx.yinwuchat.bungeecord.util.ChatUtil;
+import org.lintx.yinwuchat.bungeecord.util.PlayerUtil;
 import org.lintx.yinwuchat.bungeecord.util.WsClientHelper;
 import org.lintx.yinwuchat.bungeecord.util.WsClientUtil;
 
@@ -61,6 +63,15 @@ public class WSServer extends WebSocketServer {
             WsClientUtil util = WsClientHelper.get(conn);
             if (util instanceof WsClientUtil && util.getUuid() instanceof UUID) {
                 Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatMessage(util.getUuid(), o.getMessage()));
+                
+                //转发消息给其他webclient
+                String player_name = PlayerUtil.getPlayerName(util.getUuid());
+                String server_name = "WebClient";
+                SendMessage sendmessage = new SendMessage(player_name, o.getMessage(),server_name);
+                WSServer server = Yinwuchat.getWSServer();
+                if (server!=null) {
+                    server.broadcast(sendmessage.getJSON());
+                }
             }
         }
     }

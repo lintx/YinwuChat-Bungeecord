@@ -50,7 +50,11 @@ public class YinwuChatEvent implements Listener{
             ProxiedPlayer player = event.getPlayer();
             PlayerUtil.saveUserToSql(player);
             
-            String server_name = player.getServer().getInfo().getName();
+            String server_name = "";
+            try {
+                server_name = player.getServer().getInfo().getName();
+            } catch (Exception e) {
+            }
             PlayerStatusJSON obj = new PlayerStatusJSON(player.getDisplayName(), server_name, PlayerStatusJSON.PlayerStatus.JOIN);
             WSServer server = Yinwuchat.getWSServer();
             if (server!=null) {
@@ -65,7 +69,11 @@ public class YinwuChatEvent implements Listener{
             ProxiedPlayer player = event.getPlayer();
             PlayerUtil.saveUserToSql(player);
             
-            String server_name = player.getServer().getInfo().getName();
+            String server_name = "";
+            try {
+                server_name = player.getServer().getInfo().getName();
+            } catch (Exception e) {
+            }
             PlayerStatusJSON obj = new PlayerStatusJSON(player.getDisplayName(), server_name, PlayerStatusJSON.PlayerStatus.LEAVE);
             WSServer server = Yinwuchat.getWSServer();
             if (server!=null) {
@@ -80,7 +88,11 @@ public class YinwuChatEvent implements Listener{
             ProxiedPlayer player = event.getPlayer();
             PlayerUtil.saveUserToSql(player);
             
-            String server_name = player.getServer().getInfo().getName();
+            String server_name = "";
+            try {
+                server_name = player.getServer().getInfo().getName();
+            } catch (Exception e) {
+            }
             PlayerStatusJSON obj = new PlayerStatusJSON(player.getDisplayName(), server_name, PlayerStatusJSON.PlayerStatus.SWITCH_SERVER);
             WSServer server = Yinwuchat.getWSServer();
             if (server!=null) {
