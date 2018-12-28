@@ -10,7 +10,6 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 /**
  *
@@ -67,7 +66,8 @@ public class ChatUtil {
     }
     
     public static TextComponent formatMessage(UUID playerUUID,String message){
-        ProxiedPlayer player = PlayerUtil.getPlayer(playerUUID);
+        //ProxiedPlayer player = PlayerUtil.getPlayer(playerUUID);
+        String player_name = PlayerUtil.getPlayerName(playerUUID);
         //String _prefix = prefix.replaceAll("%player_name%", player.getDisplayName());
         //String _suffix = suffix.replaceAll("%player_name%", player.getDisplayName());
         //return _prefix + message + _suffix;
@@ -83,7 +83,7 @@ public class ChatUtil {
         iden.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tooltip).create()));
         chat.addExtra(iden);
         chat.addExtra(prefix);
-        chat.addExtra(player.getDisplayName());
+        chat.addExtra(player_name);
         chat.addExtra(separator);
         chat.addExtra(message);
         chat.addExtra(suffix);

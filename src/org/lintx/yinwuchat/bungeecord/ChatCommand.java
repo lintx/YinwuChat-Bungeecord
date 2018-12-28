@@ -18,6 +18,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import org.java_websocket.WebSocket;
 import org.lintx.yinwuchat.bungeecord.json.InputCheckToken;
+import org.lintx.yinwuchat.bungeecord.util.PlayerUtil;
 import org.lintx.yinwuchat.bungeecord.util.WsClientHelper;
 
 /**
@@ -80,12 +81,7 @@ public class ChatCommand extends Command{
                         else{
                             MySql mysql = Yinwuchat.getMySql();
                             String sql = "";
-                            Map<String,Object> userMap = getUser(playerUUID);
-                            if (userMap==null) {
-                                sql = "insert into `chat_users` (`uuid`) values(?)";
-                                mysql.execute(sql, playerUUID.toString());
-                            }
-                            userMap = getUser(playerUUID);
+                            Map<String,Object> userMap = PlayerUtil.getUserFromSql(playerUUID);
                             if (userMap==null) {
                                 commandSender.sendMessage(buildMessage(ChatColor.RED + "绑定失败，你可以重试几次，如果持续失败，请联系OP，错误代码：001"));
                                 return;
@@ -128,7 +124,7 @@ public class ChatCommand extends Command{
                     return;
                 }
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                commandSender.sendMessage(ChatColor.GREEN + "你一共绑定了"+tokens.size()+"个token，详情如下：");
+                commandSender.sendMessage(buildMessage(ChatColor.GREEN + "你一共绑定了"+tokens.size()+"个token，详情如下："));
                 for (int i = 0; i < tokens.size(); i++) {
                     Map<String,Object> token = tokens.get(i);
                     String exptime = format.format(((Date)token.get("time")).getTime()+Yinwuchat.getExpireTime());
@@ -142,12 +138,7 @@ public class ChatCommand extends Command{
                     
                     MySql mysql = Yinwuchat.getMySql();
                     String sql = "";
-                    Map<String,Object> userMap = getUser(playerUUID);
-                    if (userMap==null) {
-                        sql = "insert into `chat_users` (`uuid`) values(?)";
-                        mysql.execute(sql, playerUUID.toString());
-                    }
-                    userMap = getUser(playerUUID);
+                    Map<String,Object> userMap = PlayerUtil.getUserFromSql(playerUUID);
                     if (userMap==null) {
                         commandSender.sendMessage(buildMessage(ChatColor.RED + "解绑出错，你可以重试几次，如果持续失败，请联系OP，错误代码：001"));
                         return;
@@ -192,17 +183,8 @@ public class ChatCommand extends Command{
         return new TextComponent(message);
     }
     
-    private Map<String,Object> getUser(UUID uuid){
-        String sql = "select * from `chat_users` where uuid=?";
-        List<Map<String,Object>> list = Yinwuchat.getMySql().query(sql, uuid.toString());
-        if (list.isEmpty()) {
-            return null;
-        }
-        return list.get(0);
-    }
-    
     private List<Map<String,Object>> getTokens(UUID uuid){
-        Map<String,Object> userMap = getUser(uuid);
+        Map<String,Object> userMap = PlayerUtil.getUserFromSql(uuid);
         if (userMap==null) {
             return new ArrayList<>();
         }

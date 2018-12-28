@@ -7,9 +7,11 @@ package org.lintx.yinwuchat.bungeecord;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
+import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import org.lintx.yinwuchat.bungeecord.json.SendMessage;
+import org.lintx.yinwuchat.bungeecord.util.PlayerUtil;
 
 
 /**
@@ -34,5 +36,10 @@ public class YinwuChatEvent implements Listener{
         if (server!=null) {
             server.broadcast(message.getJSON());
         }
+    }
+    
+    @EventHandler
+    public void onPostLogin(PostLoginEvent event){
+        PlayerUtil.saveUserToSql(event.getPlayer());
     }
 }
