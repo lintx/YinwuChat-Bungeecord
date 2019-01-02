@@ -32,6 +32,10 @@ public class BaseInputJSON {
                     InputMessage result = new InputMessage(object.get("message").getAsString());
                     return result;
                 }
+                else if (action.equalsIgnoreCase("offline_message")) {
+                    InputOfflineMessage result = new InputOfflineMessage(object.get("last_id").getAsInt());
+                    return result;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

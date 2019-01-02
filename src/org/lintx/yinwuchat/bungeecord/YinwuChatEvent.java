@@ -12,8 +12,10 @@ import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import org.lintx.yinwuchat.bungeecord.json.PlayerListJSON;
 import org.lintx.yinwuchat.bungeecord.json.PlayerStatusJSON;
 import org.lintx.yinwuchat.bungeecord.json.SendMessage;
+import org.lintx.yinwuchat.bungeecord.util.Chat2SqlUtil;
 import org.lintx.yinwuchat.bungeecord.util.PlayerUtil;
 
 
@@ -31,16 +33,18 @@ public class YinwuChatEvent implements Listener{
         }
         String player_name = "Unknown Player";
         String server_name = "";
+        int message_id = -1;
         if (event.getSender() instanceof ProxiedPlayer) {
             ProxiedPlayer player = (ProxiedPlayer)event.getSender();
             player_name = player.getDisplayName();
             
             server_name = player.getServer().getInfo().getName();
+            message_id = Chat2SqlUtil.newMessage(player.getUniqueId(), server_name, chat);
         }
         SendMessage message = new SendMessage(player_name, chat,server_name);
         WSServer server = Yinwuchat.getWSServer();
         if (server!=null) {
-            server.broadcast(message.getJSON());
+            server.broadcast(message.getJSON(message_id));
         }
     }
     
@@ -60,6 +64,7 @@ public class YinwuChatEvent implements Listener{
             if (server!=null) {
                 server.broadcast(obj.getJSON());
             }
+            PlayerListJSON.sendGamePlayerList();
         }
     }
     
@@ -79,6 +84,7 @@ public class YinwuChatEvent implements Listener{
             if (server!=null) {
                 server.broadcast(obj.getJSON());
             }
+            PlayerListJSON.sendGamePlayerList();
         }
     }
     
@@ -98,6 +104,7 @@ public class YinwuChatEvent implements Listener{
             if (server!=null) {
                 server.broadcast(obj.getJSON());
             }
+            PlayerListJSON.sendGamePlayerList();
         }
     }
 }

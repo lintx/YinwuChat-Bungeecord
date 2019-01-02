@@ -13,13 +13,13 @@ import java.util.Date;
  *
  * @author jjcbw01
  */
-public class SendMessage {
-    private String action = "send_message";
+public class PrivateMessageJSON {
+    private String action = "private_message";
     private String player = "";
     private String message = "";
     private String server_name = "";
     
-    public SendMessage(String player,String message,String server_name){
+    public PrivateMessageJSON(String player,String message,String server_name){
         this.player = player;
         this.message = message;
         this.server_name = server_name;

@@ -15,6 +15,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
+import org.lintx.yinwuchat.bungeecord.util.Chat2SqlUtil;
 import org.lintx.yinwuchat.bungeecord.util.ChatUtil;
 import org.lintx.yinwuchat.bungeecord.util.WsClientHelper;
 
@@ -56,6 +57,7 @@ public class Yinwuchat extends Plugin{
     }
     
     private void loadConfig(){
+        saveDefaultConfig();
         stopWsServer();
         
         int port = getConfig().getInt("websocket.port", 8888);
@@ -107,6 +109,15 @@ public class Yinwuchat extends Plugin{
         ChatUtil.setTooltip(getConfig().getString("message.identification.tooltips"));
         ChatUtil.setUrl(getConfig().getString("message.identification.click_url"));
         ChatUtil.setSeparator(getConfig().getString("message.separator"));
+        ChatUtil.setSeparator(getConfig().getString("message.private_message_separator"));
+        ChatUtil.setInterval(getConfig().getInt("message.interval",1000));
+        
+        ChatUtil.setJoinNameColor(getConfig().getString("message.joinmessage.player_name_color"));
+        ChatUtil.setJoinMessage(getConfig().getString("message.joinmessage.message"));
+        ChatUtil.setLeaveNameColor(getConfig().getString("message.leavemessage.player_name_color"));
+        ChatUtil.setLeaveMessage(getConfig().getString("message.leavemessage.message"));
+        
+        Chat2SqlUtil.setExpireDay(getConfig().getInt("message.offline_message_expire", 0));
     }
     
     private void stopWsServer(){
@@ -131,9 +142,6 @@ public class Yinwuchat extends Plugin{
     public void onEnable(){
         plugin = this;
         
-        saveDefaultConfig();
-        
-        plugin = this;
         loadConfig();
         
         getProxy().getPluginManager().registerCommand(this, new ChatCommand("yinwuchat"));

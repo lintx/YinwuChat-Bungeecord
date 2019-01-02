@@ -61,6 +61,13 @@ mysql:
     "message":"需要发送的消息，注意，格式代码必须使用§"
 }
 ```
+3. 获取历史消息
+```
+{
+    "action":"offline_message",
+    "last_id":最后一条消息的ID，如从未获取过历史消息，应该为0（没有接收过新消息）或接收到的第一条新消息的id，如已获取过历史消息，则应该是最后一条历史消息id（id最小的那条），数据格式：int
+}
+```
 
 #### 发往Web客户端的数据：
 1. 更新token（接收到客户端发送的check_token数据，然后检查token失败时下发，收到该数据应提醒玩家在游戏内输入/yinwuchat token title命令绑定token）
@@ -86,7 +93,8 @@ mysql:
     "time":unix时间戳，单位为毫秒（java/JavaScript时间戳）,
     "player":"玩家名",
     "server":"服务器名",
-    "message":"消息内容"
+    "message":"消息内容",
+    "message_id":消息id(int)
 }
 ```
 4. 玩家登录游戏
@@ -107,7 +115,7 @@ mysql:
     "time":unix时间戳
 }
 ```
-4. 玩家切换服务器
+6. 玩家切换服务器
 ```
 {
     "action":"player_switch_server",
@@ -116,6 +124,90 @@ mysql:
     "time":unix时间戳
 }
 ```
+7. 游戏玩家列表（连接到服务器时、玩家进入游戏时、玩家切换服务器时、玩家退出游戏时发送）
+```
+{
+    "action":"game_player_list",
+    "player_list":[
+        {
+            "player_name":"玩家游戏名",
+            "server_name":"玩家所在服务器"
+        },
+        ……
+    ]
+}
+```
+8. WebClient玩家列表（连接到服务器时、玩家进入WebClient时、玩家退出WebClient时发送）
+```
+{
+    "action":"web_player_list",
+    "player_list":[
+        "玩家名1",
+        "玩家名2",
+        ……
+    ]
+}
+```
+9. 私聊消息
+```
+{
+    "action":"private_message",
+    "player":"玩家名",
+    "server":"玩家所在服务器",
+    "message":"消息内容",
+    "time":unix时间戳",
+    "message_id":消息id(int)
+}
+```
+10. WebClient玩家登录
+```
+{
+    "action":"player_web_join",
+    "player":"玩家名",
+    "time":unix时间戳"
+}
+```
+11. WebClient玩家断开连接
+```
+{
+    "action":"player_web_leave",
+    "player":"玩家名",
+    "time":unix时间戳"
+}
+```
+12. 服务器提示消息（一般为和服务器发送数据包后的错误反馈信息）
+```
+{
+    "action":"server_message",
+    "message":"消息内容",
+    "time":unix时间戳",
+    "status":状态码，详情见下方表格，数据格式：int
+}
+```
+13.历史消息
+```
+{
+    "action":"offline_message",
+    "messages":[
+        {
+            "action":"send_message公开消息/private_message私聊消息",
+            "player":"玩家名",
+            "server":"玩家所在服务器",
+            "message":"消息内容",
+            "time":unix时间戳",
+            "message_id":消息id(int)
+        },
+        ……
+    ]
+}
+```
+
+#### 服务器消息状态码
+状态码|具体含义
+-:|-
+0|一般成功或提示消息
+1|一般错误消息
+1001|获取历史聊天记录时，内容为空（不可继续获取历史消息）
 
 ### 命令
 1. 控制台命令
@@ -126,6 +218,9 @@ mysql:
     - `/yinwuchat bind token title`：绑定token，`token`是插件下发给web客户端的，玩家从web客户端获取token后到游戏内使用命令将玩家和token进行绑定，`title`是自定义标识，可以省略，绑定了标识时可以在使用`list`命令时看到，以便玩家绑定了多个token时进行识别
     - `/yinwuchat list`：列出玩家已绑定的token，每个token将显示id、过期时间和title共3种信息，id用于解绑，title用于玩家识别
     - `/yinwuchat unbind id`：解绑token，当你需要解绑某个token时使用（如在公共场合绑定了token，或者不想用这个token了，或者绑定的token达到上限了等），id为使用`list`命令时查询到的token id
+    - `/yinwuchat msg 玩家名 消息`：向玩家发送私聊消息
+3. WebClient命令
+    - `/yinwuchat msg 玩家名 消息`：向玩家发送私聊消息
 
 ### 权限
 本插件本身不需要权限，但可以给玩家赋予`yinwuchat.reload`权限以使玩家可以在游戏中使用`/yinwuchat reload`命令重新加载插件配置
@@ -144,6 +239,8 @@ mysql:
 本插件由国内正版Minecraft服务器[YinwuRealm](https://www.yinwurealm.org/)玩家[LinTx](https://mine.ly/LinTx.1)为服务器开发
 
 ### 更新记录
+- 2019-01-02 增加新功能：1.过滤空消息，2.发送消息间隔设置，3.处理命令消息，4.离线消息，5.私聊消息，6.在线玩家，7.WebClient上下线通知
+- 2018-12-28 玩家登录时将DisplayName保存到数据库，因为Bungeecord无法获取离线玩家的信息
 - 2018-12-28 插件重构到Bungeecord完成
 - 2018-12-27 YinwuChat(Bukkit)0.0.1开发完成，测试中发现DeluxeChat无法获取Bungeecord其他服务器的聊天事件，开始将插件重构到Bungeecord插件
 - 2018-12-25 开始开发YinwuChat，是一个Bukkit插件，需要DeluxeChat和PlaceHolderAPI作为前置插件

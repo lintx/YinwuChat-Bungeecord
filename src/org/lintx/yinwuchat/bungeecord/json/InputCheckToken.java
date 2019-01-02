@@ -112,7 +112,7 @@ public class InputCheckToken extends BaseInputJSON{
     private Map<String,Object> getTokenMap(String token){
         String sql = "select * from `chat_token` where token = ?";
         List<Map<String,Object>> list = Yinwuchat.getMySql().query(sql, token);
-        if (list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
             return null;
         }
         return list.get(0);

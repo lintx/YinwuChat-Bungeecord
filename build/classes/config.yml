@@ -1,13 +1,24 @@
 message:
     # wsclient get a message to send to server
     # format: identification + prefix + player_name + separator + message + suffix
+    # private message format: identification + prefix + player_name + private_message_separator + message + suffix
     identification: 
         text: '§7[YinwuChat] '
         tooltips: '点击打开YinwuChat网页'
         click_url: 'https://chat.yinwurealm.org'
     prefix: '§b'
     separator: ' §7> §f'
+    private_message_separator: ' §7悄悄的对你说: §f'
     suffix: ''
+    interval: 1000
+    joinmessage:
+        player_name_color: '§b'
+        message: '§6加入了聊天'
+    leavemessage:
+        player_name_color: '§b'
+        message: '§6离开了了聊天'
+    #offline message expire time(day) 0:not expire
+    offline_message_expire: 0
 token:
     player_max_count: 5
     expire_time: 1296000

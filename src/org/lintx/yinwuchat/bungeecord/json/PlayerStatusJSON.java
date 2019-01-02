@@ -15,7 +15,7 @@ import java.util.Date;
  */
 public class PlayerStatusJSON {
     public enum PlayerStatus{
-        JOIN,LEAVE,SWITCH_SERVER
+        JOIN,LEAVE,SWITCH_SERVER,WEB_JOIN,WEB_LEAVE
     }
     
     private String player_name;
@@ -26,6 +26,10 @@ public class PlayerStatusJSON {
         this.player_name = player_name;
         this.server_name = server_name;
         this.status = status;
+    }
+    
+    public PlayerStatusJSON(String message,PlayerStatus status){
+        this(message, "", status);
     }
     
     public String getJSON(){
@@ -45,6 +49,23 @@ public class PlayerStatusJSON {
         json.addProperty("action", action);
         json.addProperty("player", player_name);
         json.addProperty("server", server_name);
+        json.addProperty("time", new Date().getTime());
+        return new Gson().toJson(json);
+    }
+    
+    public String getWebStatusJSON(){
+        JsonObject json = new JsonObject();
+        String action = "";
+        switch (status){
+            case WEB_JOIN:
+                action = "player_web_join";
+                break;
+            case WEB_LEAVE:
+                action = "player_web_leave";
+                break;
+        }
+        json.addProperty("action", action);
+        json.addProperty("player", player_name);
         json.addProperty("time", new Date().getTime());
         return new Gson().toJson(json);
     }

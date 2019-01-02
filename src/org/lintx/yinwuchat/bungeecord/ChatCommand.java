@@ -18,6 +18,11 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import org.java_websocket.WebSocket;
 import org.lintx.yinwuchat.bungeecord.json.InputCheckToken;
+import org.lintx.yinwuchat.bungeecord.json.PlayerListJSON;
+import org.lintx.yinwuchat.bungeecord.json.PlayerStatusJSON;
+import org.lintx.yinwuchat.bungeecord.json.PrivateMessageJSON;
+import org.lintx.yinwuchat.bungeecord.util.Chat2SqlUtil;
+import org.lintx.yinwuchat.bungeecord.util.ChatUtil;
 import org.lintx.yinwuchat.bungeecord.util.PlayerUtil;
 import org.lintx.yinwuchat.bungeecord.util.WsClientHelper;
 
@@ -102,7 +107,11 @@ public class ChatCommand extends Command{
                                 if (ws!=null && (ws instanceof WebSocket)) {
                                     WsClientHelper.get(ws).setUUID(playerUUID);
                                     ws.send((new InputCheckToken(token,false)).getJSON());
+                                    WsClientHelper.kickOtherWS(ws, playerUUID);
                                 }
+                                Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(ChatUtil.joinMessage(playerUUID),PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
+                                Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatJoinMessage(playerUUID));
+                                PlayerListJSON.sendWebPlayerList();
                             }
                             else{
                                 commandSender.sendMessage(buildMessage(ChatColor.RED + "绑定失败，你可以重试几次，如果持续失败，请联系OP，错误代码：002"));
@@ -165,6 +174,49 @@ public class ChatCommand extends Command{
                 }
                 return;
             }
+            else if (first.equalsIgnoreCase("msg")) {
+                if (strings.length>=3) {
+                    //应该加入判断不能对自己发消息
+                    String to_player_name = strings[1];
+                    List<String> tmpList = new ArrayList<>();
+                    for (int i = 2; i < strings.length; i++) {
+                        tmpList.add(strings[i]);
+                    }
+                    String msg = String.join(" ", tmpList);
+                    int message_id = -1;
+                    
+                    boolean issend = false;
+                    ProxiedPlayer toPlayer = Yinwuchat.getPlugin().getProxy().getPlayer(to_player_name);
+                    String server_name = "";
+                    try {
+                        server_name = player.getServer().getInfo().getName();
+                    } catch (Exception e) {
+                    }
+                    if (toPlayer!=null && toPlayer instanceof ProxiedPlayer) {
+                        toPlayer.sendMessage(ChatUtil.formatPrivateMessage(to_player_name, msg));
+                        issend = true;
+                        message_id = Chat2SqlUtil.newMessage(playerUUID, toPlayer.getUniqueId(), server_name, msg);
+                    }
+                    WebSocket ws = WsClientHelper.getWebSocketAsPlayerName(to_player_name);
+                    if (ws!=null && ws instanceof WebSocket) {
+                        PrivateMessageJSON msgJSON = new PrivateMessageJSON(player.getDisplayName(), msg, server_name);
+                        if (!issend) {
+                            message_id = Chat2SqlUtil.newMessage(playerUUID, WsClientHelper.get(ws).getUuid(), server_name, msg);
+                        }
+                        ws.send(msgJSON.getJSON(message_id));
+                        issend = true;
+                    }
+                    if (!issend) {
+                        commandSender.sendMessage(buildMessage(ChatColor.RED + "玩家" + to_player_name + "不在线"));
+                    }
+                    
+                }
+                else{
+                    commandSender.sendMessage(buildMessage(ChatColor.RED + "命令格式：/yinwuchat msg 玩家名 消息"));
+                    commandSender.sendMessage(buildMessage(ChatColor.RED + "缺少玩家名或消息"));
+                }
+                return;
+            }
         }
         commandSender.sendMessage(buildMessage(ChatColor.GOLD + "YinwuChat Version "+ Yinwuchat.getPlugin().getDescription().getVersion() + ",Author:"+Yinwuchat.getPlugin().getDescription().getAuthor()));
         commandSender.sendMessage(buildMessage(ChatColor.GOLD + "插件帮助："));
@@ -176,6 +228,8 @@ public class ChatCommand extends Command{
         commandSender.sendMessage(buildMessage(ChatColor.GOLD + "解绑：/yinwuchat unbind <id>"));
         commandSender.sendMessage(buildMessage(ChatColor.GOLD + "可以解绑对应的token，id为查询结果中的id"));
         commandSender.sendMessage(buildMessage(ChatColor.GOLD + "例：/yinwuchat unbind 1"));
+        commandSender.sendMessage(buildMessage(ChatColor.GOLD + "发送私聊消息：/yinwuchat msg <player_name> <message>"));
+        commandSender.sendMessage(buildMessage(ChatColor.GOLD + "例：/yinwuchat msg LinTx 一条私聊消息"));
         return;
     }
     

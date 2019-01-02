@@ -159,6 +159,40 @@ public class MySql {
             release(conn, ps, null);
         }
     }
+    
+    public int insert(String sql, Object... params){
+        Connection conn = null;
+        PreparedStatement ps = null;
+        int last_id = -1;
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    ps.setObject(i + 1, params[i]);
+                }
+            }
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                return last_id;
+            }
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    last_id = (int)generatedKeys.getLong(1);
+                }
+                else {
+                    throw new SQLException("Creating user failed, no ID obtained.");
+                }
+            }
+            return last_id;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return last_id;
+        } finally {
+            release(conn, ps, null);
+        }
+    }
 
     /**
     * 查询数据
@@ -192,7 +226,7 @@ public class MySql {
             while (rs.next()) {
                 Map<String, Object> rowData = new HashMap<String, Object>();
                 for (int i = 1; i <= columnCount; i++) {
-                    rowData.put(md.getColumnName(i), rs.getObject(i));
+                    rowData.put(md.getColumnLabel(i), rs.getObject(i));
                 }
                 list.add(rowData);
             }

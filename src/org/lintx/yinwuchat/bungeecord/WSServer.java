@@ -5,14 +5,31 @@
  */
 package org.lintx.yinwuchat.bungeecord;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.lintx.yinwuchat.bungeecord.json.BaseInputJSON;
 import org.lintx.yinwuchat.bungeecord.json.InputCheckToken;
 import org.lintx.yinwuchat.bungeecord.json.InputMessage;
+import org.lintx.yinwuchat.bungeecord.json.InputOfflineMessage;
+import org.lintx.yinwuchat.bungeecord.json.PlayerListJSON;
+import org.lintx.yinwuchat.bungeecord.json.PlayerStatusJSON;
+import org.lintx.yinwuchat.bungeecord.json.PrivateMessageJSON;
 import org.lintx.yinwuchat.bungeecord.json.SendMessage;
+import org.lintx.yinwuchat.bungeecord.json.ServerMessageJSON;
+import org.lintx.yinwuchat.bungeecord.util.Chat2SqlUtil;
 import org.lintx.yinwuchat.bungeecord.util.ChatUtil;
 import org.lintx.yinwuchat.bungeecord.util.PlayerUtil;
 import org.lintx.yinwuchat.bungeecord.util.WsClientHelper;
@@ -29,18 +46,25 @@ public class WSServer extends WebSocketServer {
     }
 
     @Override
-    public void onOpen(org.java_websocket.WebSocket conn, ClientHandshake handshake) {
-        
+    public void onOpen(WebSocket conn, ClientHandshake handshake) {
+        PlayerListJSON.sendGamePlayerList();
+        PlayerListJSON.sendWebPlayerList();
     }
 
     @Override
-    public void onClose(org.java_websocket.WebSocket conn, int code, String reason, boolean remote) {
+    public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         //Yinwuchat.getPlugin().getLogger().info("ws on close");
+        WsClientUtil util = WsClientHelper.get(conn);
+        if (util instanceof WsClientUtil && util.getUuid() instanceof UUID) {
+            Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(ChatUtil.leaveMessage(util.getUuid()),PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
+            Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatLeaveMessage(util.getUuid()));
+        }
         WsClientHelper.remove(conn);
+        PlayerListJSON.sendWebPlayerList();
     }
 
     @Override
-    public void onMessage(org.java_websocket.WebSocket conn, String message) {
+    public void onMessage(WebSocket conn, String message) {
         BaseInputJSON object = BaseInputJSON.getObject(message);
         if (object instanceof InputCheckToken) {
             InputCheckToken o = (InputCheckToken)object;
@@ -54,30 +78,148 @@ public class WSServer extends WebSocketServer {
             else{
                 if (o.getIsbind()) {
                     clientUtil.setUUID(o.getUuid());
+                    WsClientHelper.kickOtherWS(conn, o.getUuid());
+                    Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(ChatUtil.joinMessage(o.getUuid()),PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
+                    Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatJoinMessage(o.getUuid()));
                 }
             }
             WsClientHelper.add(conn, clientUtil);
+            PlayerListJSON.sendWebPlayerList();
         }
         else if (object instanceof InputMessage) {
             InputMessage o = (InputMessage)object;
+            if (o.getMessage().equalsIgnoreCase("")) {
+                return;
+            }
+            
             WsClientUtil util = WsClientHelper.get(conn);
             if (util instanceof WsClientUtil && util.getUuid() instanceof UUID) {
+                long diff = new Date().getTime() - util.getLastDate().getTime();
+                if (diff < ChatUtil.getInterval()) {
+                    conn.send(ServerMessageJSON.errorJSON("发送消息过快（当前设置为每条消息之间最少间隔"+(ChatUtil.getInterval())+"毫秒）").getJSON());
+                    return;
+                }
+                util.updateLastDate();
+                int message_id = -1;
+                
+                if (o.getMessage().startsWith("/")) {
+                    String[] command = o.getMessage().replaceFirst("^/", "").split("\\s");
+                    if (command[0].equalsIgnoreCase("yinwuchat")) {
+                        if (command.length>=4) {
+                            if (command[1].equalsIgnoreCase("msg")) {
+                                String to_player_name = command[2];
+                                List<String> tmpList = new ArrayList<>();
+                                for (int i = 3; i < command.length; i++) {
+                                    tmpList.add(command[i]);
+                                }
+                                String msg = String.join(" ", tmpList);
+
+                                boolean issend = false;
+                                String server_name = "WebClient";
+                                ProxiedPlayer toPlayer = Yinwuchat.getPlugin().getProxy().getPlayer(to_player_name);
+                                if (toPlayer!=null && toPlayer instanceof ProxiedPlayer) {
+                                    toPlayer.sendMessage(ChatUtil.formatPrivateMessage(to_player_name, msg));
+                                    issend = true;
+                                    message_id = Chat2SqlUtil.newMessage(util.getUuid(), toPlayer.getUniqueId(), server_name, msg);
+                                }
+                                WebSocket ws = WsClientHelper.getWebSocketAsPlayerName(to_player_name);
+                                if (ws!=null && ws instanceof WebSocket) {
+                                    PrivateMessageJSON msgJSON = new PrivateMessageJSON(util.getPlayerName(), msg, server_name);
+                                    if (!issend) {
+                                        message_id = Chat2SqlUtil.newMessage(util.getUuid(), WsClientHelper.get(ws).getUuid(), server_name, msg);
+                                    }
+                                    ws.send(msgJSON.getJSON(message_id));
+                                    issend = true;
+                                }
+                                if (!issend) {
+                                    conn.send(ServerMessageJSON.errorJSON("玩家" + to_player_name + "不在线").getJSON());
+                                }
+                            }
+                            else{
+                                conn.send(ServerMessageJSON.errorJSON("发送私聊消息的正确格式为/yinwuchat msg 玩家名 消息").getJSON());
+                                conn.send(ServerMessageJSON.errorJSON("其他命令暂不支持").getJSON());
+                            }
+                        }
+                        else{
+                            conn.send(ServerMessageJSON.errorJSON("发送私聊消息的正确格式为/yinwuchat msg 玩家名 消息").getJSON());
+                            conn.send(ServerMessageJSON.errorJSON("其他命令暂不支持").getJSON());
+                        }
+                    }
+                    else{
+                        conn.send(ServerMessageJSON.errorJSON("YinwuChat目前只支持/yinwuchat msg 命令").getJSON());
+                    }
+                    return;
+                }
+                
                 Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatMessage(util.getUuid(), o.getMessage()));
                 
                 //转发消息给其他webclient
                 String player_name = PlayerUtil.getPlayerName(util.getUuid());
                 String server_name = "WebClient";
                 SendMessage sendmessage = new SendMessage(player_name, o.getMessage(),server_name);
+                message_id = Chat2SqlUtil.newMessage(util.getUuid(), server_name, o.getMessage());
                 WSServer server = Yinwuchat.getWSServer();
                 if (server!=null) {
-                    server.broadcast(sendmessage.getJSON());
+                    server.broadcast(sendmessage.getJSON(message_id));
                 }
             }
+        }
+        else if (object instanceof InputOfflineMessage) {
+            WsClientUtil util = WsClientHelper.get(conn);
+            if (util instanceof WsClientUtil && util.getUuid() instanceof UUID) {
+                long diff = new Date().getTime() - util.getLastDate().getTime();
+                if (diff < ChatUtil.getInterval()) {
+                    conn.send(ServerMessageJSON.errorJSON("发送消息过快（当前设置为每条消息之间最少间隔"+(ChatUtil.getInterval())+"毫秒）").getJSON());
+                    return;
+                }
+                util.updateLastDate();
+                Map<String,Object> player = PlayerUtil.getUserFromSql(util.getUuid());
+                if (player==null) {
+                    return;
+                }
+                int player_id = (int)player.get("id");
+                InputOfflineMessage o = (InputOfflineMessage)object;
+                List<Map<String, Object>> messages = null;
+                if (o.getLastId()>0) {
+                    String sql = "select `chat_message`.*,`chat_users`.`display_name` as `player_name` from `chat_message` LEFT JOIN `chat_users` ON `chat_users`.`id` = `chat_message`.`player_id` where `chat_message`.`id` < ? and (`chat_message`.`to_player_id`=0 or `chat_message`.`to_player_id`=?) order by `id` desc limit 50";
+                    messages = Yinwuchat.getMySql().query(sql, o.getLastId(),player_id);
+                }
+                else if (o.getLastId()==0) {
+                    String sql = "select `chat_message`.*,`chat_users`.`display_name` as `player_name` from `chat_message` LEFT JOIN `chat_users` ON `chat_users`.`id` = `chat_message`.`player_id` where `chat_message`.`to_player_id`=0 or `chat_message`.`to_player_id`=? order by `id` desc limit 50";
+                    messages = Yinwuchat.getMySql().query(sql, player_id);
+                }
+                if (messages==null || messages.isEmpty()) {
+                    conn.send(ServerMessageJSON.errorJSON("已经获取了所有聊天记录",1001).getJSON());
+                    return;
+                }
+                JsonArray jsonArray = new JsonArray();
+                for (int i = 0; i < messages.size(); i++) {
+                    Map<String, Object> m = messages.get(i);
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("message", (String)m.get("message"));
+                    jsonObject.addProperty("server", (String)m.get("server"));
+                    jsonObject.addProperty("player", (String)m.get("player_name"));
+                    jsonObject.addProperty("message_id", (int)m.get("id"));
+                    jsonObject.addProperty("time", ((Date)m.get("time")).getTime());
+                    if ((int)m.get("to_player_id")==0) {
+                        jsonObject.addProperty("action", "send_message");
+                    }
+                    else{
+                        jsonObject.addProperty("action", "private_message");
+                    }
+                    jsonArray.add(jsonObject);
+                }
+                JsonObject resultJsonObject = new JsonObject();
+                resultJsonObject.addProperty("action", "offline_message");
+                resultJsonObject.add("messages", jsonArray);
+                conn.send(new Gson().toJson(resultJsonObject));
+            }
+            
         }
     }
 
     @Override
-    public void onError(org.java_websocket.WebSocket conn, Exception ex) {
+    public void onError(WebSocket conn, Exception ex) {
         Yinwuchat.getPlugin().getLogger().info("ws on error");
         ex.printStackTrace();
     }

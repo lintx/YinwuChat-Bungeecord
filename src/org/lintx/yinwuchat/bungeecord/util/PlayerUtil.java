@@ -77,7 +77,7 @@ public class PlayerUtil {
     public static Map<String,Object> getUserFromSql(UUID uuid,Boolean autoSaveUser){
         String sql = "select * from `chat_users` where uuid=?";
         List<Map<String,Object>> list = Yinwuchat.getMySql().query(sql, uuid.toString());
-        if (list.isEmpty()) {
+        if (list != null && list.isEmpty()) {
             if (autoSaveUser) {
                 try {
                     ProxiedPlayer player = Yinwuchat.getPlugin().getProxy().getPlayer(uuid);
