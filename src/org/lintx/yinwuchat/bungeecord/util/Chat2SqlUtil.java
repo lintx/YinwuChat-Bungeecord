@@ -22,6 +22,10 @@ public class Chat2SqlUtil {
         offline_message_expire = expire;
     }
     
+    public static int getExpireDay(){
+        return offline_message_expire;
+    }
+    
     public static int newMessage(UUID player_uuid,String server_name,String message){
         int player_id = 0;
         try {
@@ -59,12 +63,6 @@ public class Chat2SqlUtil {
     
     private static int newMessage(int player_id,int to_player_id,String server_name,String message){
         MySql mysql = Yinwuchat.getMySql();
-        try {
-            Date now = new Date();
-            Timestamp timestamp = new Timestamp(now.getTime() - offline_message_expire * 24 * 60 * 60 * 1000);
-            mysql.execute("delete from `chat_message` where time<?", timestamp);
-        } catch (Exception e) {
-        }
         String sql = "insert into `chat_message` (`player_id`,`to_player_id`,`server`,`message`) values(?,?,?,?)";
         return mysql.insert(sql, player_id,to_player_id,server_name,message);
     }

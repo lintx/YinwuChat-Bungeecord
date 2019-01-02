@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.net.InetSocketAddress;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -173,6 +174,13 @@ public class WSServer extends WebSocketServer {
                     return;
                 }
                 util.updateLastDate();
+                
+                try {
+                    Date now = new Date();
+                    Timestamp timestamp = new Timestamp(now.getTime() - Chat2SqlUtil.getExpireDay() * 24 * 60 * 60 * 1000);
+                    Yinwuchat.getMySql().execute("delete from `chat_message` where time<?", timestamp);
+                } catch (Exception e) {
+                }
                 Map<String,Object> player = PlayerUtil.getUserFromSql(util.getUuid());
                 if (player==null) {
                     return;

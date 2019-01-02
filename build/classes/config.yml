@@ -13,10 +13,10 @@ message:
     interval: 1000
     joinmessage:
         player_name_color: '§b'
-        message: '§6加入了聊天'
+        message: '§6加入了YinwuChat'
     leavemessage:
         player_name_color: '§b'
-        message: '§6离开了了聊天'
+        message: '§6离开了了YinwuChat'
     #offline message expire time(day) 0:not expire
     offline_message_expire: 0
 token:

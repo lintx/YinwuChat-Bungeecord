@@ -16,6 +16,7 @@ YinwuChat-Bungeecord的默认配置文件内容为：
 message:
     # 玩家在Web客户端向游戏内发送聊天内容时，游戏内玩家所看到的样式
     # 具体样式为identification.text + prefix + player_name + separator + message + suffix
+    # 私聊消息样式为identification.text + prefix + player_name + private_message_separator + message + suffix
     # identification字段有tooltip(鼠标移动上去时的提示，内容为identification.tooltips字段的内容)，且可以点击，点击将打开网页（identification.click_url）
     # 本插件的文字样式代码必须使用`§`,使用`&`将会直接显示出来
     identification: 
@@ -24,7 +25,17 @@ message:
         click_url: 'https://chat.yinwurealm.org'
     prefix: '§b'
     separator: ' §7> §f'
+    private_message_separator: ' §7悄悄的对你说: §f'        #私聊消息分隔
     suffix: ''
+    interval: 1000                  #WebClient发送消息最小间隔时间
+    joinmessage:
+        player_name_color: '§b'
+        message: '§6加入了YinwuChat'
+    leavemessage:
+        player_name_color: '§b'
+        message: '§6离开了了YinwuChat'
+    #离线消息保存时间，单位：天，0为永久保存
+    offline_message_expire: 0
 token:
     player_max_count: 5         #单个玩家最多可以同时绑定的token的数量（使用绑定的token可以在Web客户端以绑定的游戏名向游戏内发送消息）
     expire_time: 1296000        #token过期时间，自token生成时计算，超过该时间（单位为秒）的token将无法使用并会被删除
