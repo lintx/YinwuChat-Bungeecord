@@ -2,6 +2,7 @@ message:
     # wsclient get a message to send to server
     # format: identification + prefix + player_name + separator + message + suffix
     # private message format: identification + prefix + player_name + private_message_separator + message + suffix
+    # me's private message format: identification + prefix + me_private_message_separator1 + player_name + me_private_message_separator2 + message + suffix
     identification: 
         text: '§7[YinwuChat] '
         tooltips: '点击打开YinwuChat网页'
@@ -9,6 +10,8 @@ message:
     prefix: '§b'
     separator: ' §7> §f'
     private_message_separator: ' §7悄悄的对你说: §f'
+    me_private_message_separator1: '§7你悄悄的对§b'
+    me_private_message_separator2: '§7说: §f'
     suffix: ''
     interval: 1000
     joinmessage:

@@ -17,6 +17,7 @@ message:
     # 玩家在Web客户端向游戏内发送聊天内容时，游戏内玩家所看到的样式
     # 具体样式为identification.text + prefix + player_name + separator + message + suffix
     # 私聊消息样式为identification.text + prefix + player_name + private_message_separator + message + suffix
+    # 我发送的私聊消息样式为identification + prefix + me_private_message_separator1 + player_name + me_private_message_separator2 + message + suffix
     # identification字段有tooltip(鼠标移动上去时的提示，内容为identification.tooltips字段的内容)，且可以点击，点击将打开网页（identification.click_url）
     # 本插件的文字样式代码必须使用`§`,使用`&`将会直接显示出来
     identification: 
@@ -26,6 +27,8 @@ message:
     prefix: '§b'
     separator: ' §7> §f'
     private_message_separator: ' §7悄悄的对你说: §f'        #私聊消息分隔
+    private_message_separator: ' §7悄悄的对你说: §f'
+    me_private_message_separator1: ' §7你悄悄的对'
     suffix: ''
     interval: 1000                  #WebClient发送消息最小间隔时间
     joinmessage:
@@ -201,7 +204,7 @@ mysql:
     "action":"offline_message",
     "messages":[
         {
-            "action":"send_message公开消息/private_message私聊消息",
+            "action":"send_message公开消息/private_message私聊消息/me_private_message我发送的私聊消息",
             "player":"玩家名",
             "server":"玩家所在服务器",
             "message":"消息内容",
@@ -210,6 +213,17 @@ mysql:
         },
         ……
     ]
+}
+```
+14. 我发送的私聊消息
+```
+{
+    "action":"me_private_message",
+    "player":"玩家名",
+    "server":"玩家所在服务器",
+    "message":"消息内容",
+    "time":unix时间戳",
+    "message_id":消息id(int)
 }
 ```
 

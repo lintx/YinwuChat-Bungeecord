@@ -24,6 +24,8 @@ public class ChatUtil {
     private static String separator = "";
     private static int interval = 1000;
     private static String private_separator = "";
+    private static String me_private_separator1 = "";
+    private static String me_private_separator2 = "";
     
     private static String join_name_color = "";
     private static String join_message = "";
@@ -77,6 +79,20 @@ public class ChatUtil {
             separator = "";
         }
         ChatUtil.private_separator = separator;
+    }
+    
+    public static void setMePrivateSeparator1(String separator){
+        if (separator==null) {
+            separator = "";
+        }
+        ChatUtil.me_private_separator1 = separator;
+    }
+    
+    public static void setMePrivateSeparator2(String separator){
+        if (separator==null) {
+            separator = "";
+        }
+        ChatUtil.me_private_separator2 = separator;
     }
     
     public static void setInterval(int interval){
@@ -141,6 +157,19 @@ public class ChatUtil {
         return chat;
     }
     
+    public static TextComponent formatMePrivateMessage(String player_name,String message){
+        TextComponent chat = new TextComponent();
+        
+        chat.addExtra(pluginTextComponent());
+        chat.addExtra(prefix);
+        chat.addExtra(me_private_separator1);
+        chat.addExtra(playerNameTextComponent("", player_name, true));
+        chat.addExtra(me_private_separator2);
+        chat.addExtra(message);
+        chat.addExtra(suffix);
+        return chat;
+    }
+    
     public static TextComponent formatJoinMessage(UUID playerUUID){
         String player_name = PlayerUtil.getPlayerName(playerUUID);
         
@@ -153,11 +182,6 @@ public class ChatUtil {
         return chat;
     }
     
-    public static String joinMessage(UUID playerUUID){
-        String player_name = PlayerUtil.getPlayerName(playerUUID);
-        return join_name_color + player_name + join_message;
-    }
-    
     public static TextComponent formatLeaveMessage(UUID playerUUID){
         String player_name = PlayerUtil.getPlayerName(playerUUID);
         
@@ -168,11 +192,6 @@ public class ChatUtil {
         chat.addExtra(playerNameTextComponent(leave_name_color, player_name, false));
         chat.addExtra(leave_message);
         return chat;
-    }
-    
-    public static String leaveMessage(UUID playerUUID){
-        String player_name = PlayerUtil.getPlayerName(playerUUID);
-        return leave_message + player_name + leave_message;
     }
     
     private static TextComponent pluginTextComponent(){

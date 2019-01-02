@@ -57,7 +57,7 @@ public class WSServer extends WebSocketServer {
         //Yinwuchat.getPlugin().getLogger().info("ws on close");
         WsClientUtil util = WsClientHelper.get(conn);
         if (util instanceof WsClientUtil && util.getUuid() instanceof UUID) {
-            Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(ChatUtil.leaveMessage(util.getUuid()),PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
+            Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(util.getPlayerName(),PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
             Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatLeaveMessage(util.getUuid()));
         }
         WsClientHelper.remove(conn);
@@ -80,7 +80,8 @@ public class WSServer extends WebSocketServer {
                 if (o.getIsbind()) {
                     clientUtil.setUUID(o.getUuid());
                     WsClientHelper.kickOtherWS(conn, o.getUuid());
-                    Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(ChatUtil.joinMessage(o.getUuid()),PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
+                    String player_name = PlayerUtil.getPlayerName(o.getUuid());
+                    Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(player_name,PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
                     Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatJoinMessage(o.getUuid()));
                 }
             }
@@ -114,6 +115,11 @@ public class WSServer extends WebSocketServer {
                                     tmpList.add(command[i]);
                                 }
                                 String msg = String.join(" ", tmpList);
+                                
+                                if (util.getPlayerName().equalsIgnoreCase(to_player_name)) {
+                                    conn.send(ServerMessageJSON.errorJSON("你不能向自己发送私聊信息").getJSON());
+                                    return;
+                                }
 
                                 boolean issend = false;
                                 String server_name = "WebClient";
@@ -124,8 +130,8 @@ public class WSServer extends WebSocketServer {
                                     message_id = Chat2SqlUtil.newMessage(util.getUuid(), toPlayer.getUniqueId(), server_name, msg);
                                 }
                                 WebSocket ws = WsClientHelper.getWebSocketAsPlayerName(to_player_name);
+                                PrivateMessageJSON msgJSON = new PrivateMessageJSON(util.getPlayerName(), msg, server_name);
                                 if (ws!=null && ws instanceof WebSocket) {
-                                    PrivateMessageJSON msgJSON = new PrivateMessageJSON(util.getPlayerName(), msg, server_name);
                                     if (!issend) {
                                         message_id = Chat2SqlUtil.newMessage(util.getUuid(), WsClientHelper.get(ws).getUuid(), server_name, msg);
                                     }
@@ -134,6 +140,9 @@ public class WSServer extends WebSocketServer {
                                 }
                                 if (!issend) {
                                     conn.send(ServerMessageJSON.errorJSON("玩家" + to_player_name + "不在线").getJSON());
+                                }
+                                else{
+                                    conn.send(msgJSON.getMeJSON(message_id));
                                 }
                             }
                             else{
@@ -151,7 +160,6 @@ public class WSServer extends WebSocketServer {
                     }
                     return;
                 }
-                
                 Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatMessage(util.getUuid(), o.getMessage()));
                 
                 //转发消息给其他webclient
@@ -168,18 +176,23 @@ public class WSServer extends WebSocketServer {
         else if (object instanceof InputOfflineMessage) {
             WsClientUtil util = WsClientHelper.get(conn);
             if (util instanceof WsClientUtil && util.getUuid() instanceof UUID) {
-                long diff = new Date().getTime() - util.getLastDate().getTime();
-                if (diff < ChatUtil.getInterval()) {
-                    conn.send(ServerMessageJSON.errorJSON("发送消息过快（当前设置为每条消息之间最少间隔"+(ChatUtil.getInterval())+"毫秒）").getJSON());
-                    return;
+                if (ChatUtil.getInterval()>0) {
+                    long diff = new Date().getTime() - util.getLastDate().getTime();
+                    if (diff < ChatUtil.getInterval()) {
+                        conn.send(ServerMessageJSON.errorJSON("发送消息过快（当前设置为每条消息之间最少间隔"+(ChatUtil.getInterval())+"毫秒）").getJSON());
+                        return;
+                    }
                 }
+                
                 util.updateLastDate();
                 
-                try {
-                    Date now = new Date();
-                    Timestamp timestamp = new Timestamp(now.getTime() - Chat2SqlUtil.getExpireDay() * 24 * 60 * 60 * 1000);
-                    Yinwuchat.getMySql().execute("delete from `chat_message` where time<?", timestamp);
-                } catch (Exception e) {
+                if (Chat2SqlUtil.getExpireDay()>0) {
+                    try {
+                        Date now = new Date();
+                        Timestamp timestamp = new Timestamp(now.getTime() - Chat2SqlUtil.getExpireDay() * 24 * 60 * 60 * 1000);
+                        Yinwuchat.getMySql().execute("delete from `chat_message` where time<?", timestamp);
+                    } catch (Exception e) {
+                    }
                 }
                 Map<String,Object> player = PlayerUtil.getUserFromSql(util.getUuid());
                 if (player==null) {
@@ -189,12 +202,12 @@ public class WSServer extends WebSocketServer {
                 InputOfflineMessage o = (InputOfflineMessage)object;
                 List<Map<String, Object>> messages = null;
                 if (o.getLastId()>0) {
-                    String sql = "select `chat_message`.*,`chat_users`.`display_name` as `player_name` from `chat_message` LEFT JOIN `chat_users` ON `chat_users`.`id` = `chat_message`.`player_id` where `chat_message`.`id` < ? and (`chat_message`.`to_player_id`=0 or `chat_message`.`to_player_id`=?) order by `id` desc limit 50";
-                    messages = Yinwuchat.getMySql().query(sql, o.getLastId(),player_id);
+                    String sql = "select `chat_message`.*,`c1`.`display_name` as `player_name`,`c2`.`display_name` as `to_player_name` from `chat_message` LEFT JOIN `chat_users` `c1` ON `c1`.`id` = `chat_message`.`player_id` LEFT JOIN `chat_users` `c2` ON `c2`.`id` = `chat_message`.`to_player_id` where `chat_message`.`id` < ? and (`chat_message`.`to_player_id`=0 or `chat_message`.`to_player_id`=? or `chat_message`.`player_id`=?) order by `id` desc limit 50";
+                    messages = Yinwuchat.getMySql().query(sql, o.getLastId(),player_id,player_id);
                 }
                 else if (o.getLastId()==0) {
-                    String sql = "select `chat_message`.*,`chat_users`.`display_name` as `player_name` from `chat_message` LEFT JOIN `chat_users` ON `chat_users`.`id` = `chat_message`.`player_id` where `chat_message`.`to_player_id`=0 or `chat_message`.`to_player_id`=? order by `id` desc limit 50";
-                    messages = Yinwuchat.getMySql().query(sql, player_id);
+                    String sql = "select `chat_message`.*,`c1`.`display_name` as `player_name`,`c2`.`display_name` as `to_player_name` from `chat_message` LEFT JOIN `chat_users` `c1` ON `c1`.`id` = `chat_message`.`player_id` LEFT JOIN `chat_users` `c2` ON `c2`.`id` = `chat_message`.`to_player_id` where `chat_message`.`to_player_id`=0 or `chat_message`.`to_player_id`=? or `chat_message`.`player_id`=? order by `id` desc limit 50";
+                    messages = Yinwuchat.getMySql().query(sql, player_id,player_id);
                 }
                 if (messages==null || messages.isEmpty()) {
                     conn.send(ServerMessageJSON.errorJSON("已经获取了所有聊天记录",1001).getJSON());
@@ -213,7 +226,12 @@ public class WSServer extends WebSocketServer {
                         jsonObject.addProperty("action", "send_message");
                     }
                     else{
-                        jsonObject.addProperty("action", "private_message");
+                        if ((int)m.get("player_id")==player_id) {
+                            jsonObject.addProperty("action", "me_private_message");
+                        }
+                        else if ((int)m.get("to_player_id")==player_id) {
+                            jsonObject.addProperty("action", "private_message");
+                        }
                     }
                     jsonArray.add(jsonObject);
                 }

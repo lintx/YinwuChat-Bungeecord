@@ -15,6 +15,7 @@ import java.util.Date;
  */
 public class PrivateMessageJSON {
     private String action = "private_message";
+    private String me_action = "me_private_message";
     private String player = "";
     private String message = "";
     private String server_name = "";
@@ -28,6 +29,17 @@ public class PrivateMessageJSON {
     public String getJSON(int message_id){
         JsonObject json = new JsonObject();
         json.addProperty("action", action);
+        json.addProperty("player", player);
+        json.addProperty("server", server_name);
+        json.addProperty("message", message);
+        json.addProperty("time", new Date().getTime());
+        json.addProperty("message_id", message_id);
+        return new Gson().toJson(json);
+    }
+    
+    public String getMeJSON(int message_id){
+        JsonObject json = new JsonObject();
+        json.addProperty("action", me_action);
         json.addProperty("player", player);
         json.addProperty("server", server_name);
         json.addProperty("message", message);

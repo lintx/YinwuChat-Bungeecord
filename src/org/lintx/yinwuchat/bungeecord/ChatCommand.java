@@ -109,7 +109,7 @@ public class ChatCommand extends Command{
                                     ws.send((new InputCheckToken(token,false)).getJSON());
                                     WsClientHelper.kickOtherWS(ws, playerUUID);
                                 }
-                                Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(ChatUtil.joinMessage(playerUUID),PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
+                                Yinwuchat.getWSServer().broadcast((new PlayerStatusJSON(player.getDisplayName(),PlayerStatusJSON.PlayerStatus.WEB_JOIN)).getWebStatusJSON());
                                 Yinwuchat.getPlugin().getProxy().broadcast(ChatUtil.formatJoinMessage(playerUUID));
                                 PlayerListJSON.sendWebPlayerList();
                             }
@@ -185,6 +185,11 @@ public class ChatCommand extends Command{
                     String msg = String.join(" ", tmpList);
                     int message_id = -1;
                     
+                    if (to_player_name.equalsIgnoreCase(player.getDisplayName())) {
+                        commandSender.sendMessage(buildMessage(ChatColor.RED + "你不能向自己发送私聊信息"));
+                        return;
+                    }
+                    
                     boolean issend = false;
                     ProxiedPlayer toPlayer = Yinwuchat.getPlugin().getProxy().getPlayer(to_player_name);
                     String server_name = "";
@@ -209,7 +214,9 @@ public class ChatCommand extends Command{
                     if (!issend) {
                         commandSender.sendMessage(buildMessage(ChatColor.RED + "玩家" + to_player_name + "不在线"));
                     }
-                    
+                    else{
+                        commandSender.sendMessage(ChatUtil.formatMePrivateMessage(to_player_name, msg));
+                    }
                 }
                 else{
                     commandSender.sendMessage(buildMessage(ChatColor.RED + "命令格式：/yinwuchat msg 玩家名 消息"));

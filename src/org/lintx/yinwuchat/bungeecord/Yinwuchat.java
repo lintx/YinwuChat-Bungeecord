@@ -109,7 +109,9 @@ public class Yinwuchat extends Plugin{
         ChatUtil.setTooltip(getConfig().getString("message.identification.tooltips"));
         ChatUtil.setUrl(getConfig().getString("message.identification.click_url"));
         ChatUtil.setSeparator(getConfig().getString("message.separator"));
-        ChatUtil.setSeparator(getConfig().getString("message.private_message_separator"));
+        ChatUtil.setPrivateSeparator(getConfig().getString("message.private_message_separator"));
+        ChatUtil.setMePrivateSeparator1(getConfig().getString("message.me_private_message_separator1"));
+        ChatUtil.setMePrivateSeparator2(getConfig().getString("message.me_private_message_separator2"));
         ChatUtil.setInterval(getConfig().getInt("message.interval",1000));
         
         ChatUtil.setJoinNameColor(getConfig().getString("message.joinmessage.player_name_color"));
@@ -118,6 +120,7 @@ public class Yinwuchat extends Plugin{
         ChatUtil.setLeaveMessage(getConfig().getString("message.leavemessage.message"));
         
         Chat2SqlUtil.setExpireDay(getConfig().getInt("message.offline_message_expire", 0));
+        
     }
     
     private void stopWsServer(){
