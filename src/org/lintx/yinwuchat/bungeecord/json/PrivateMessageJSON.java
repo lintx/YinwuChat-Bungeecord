@@ -14,8 +14,8 @@ import java.util.Date;
  * @author jjcbw01
  */
 public class PrivateMessageJSON {
-    private String action = "private_message";
-    private String me_action = "me_private_message";
+    private final String action = "private_message";
+    private final String me_action = "me_private_message";
     private String player = "";
     private String message = "";
     private String server_name = "";

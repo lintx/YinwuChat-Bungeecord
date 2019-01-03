@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/Yinwuchat.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/BaseInputJSON.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/PlayerStatusJSON.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/InputCheckToken.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/PrivateMessageJSON.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/YinwuChatEvent.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/PlayerListJSON.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/util/WsClientHelper.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/util/WsClientUtil.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/InputMessage.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/ServerMessageJSON.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/WSServer.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/InputOfflineMessage.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/nbproject/build-impl.xml</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/config.yml</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/json/SendMessage.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/util/Chat2SqlUtil.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/ChatCommand.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/util/PlayerUtil.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/MySql.java</file>
+            <file>file:/H:/yinwu/yinwuchat-bungeecord/src/org/lintx/yinwuchat/bungeecord/util/ChatUtil.java</file>
+        </group>
+    </open-files>
+</project-private>

@@ -6,11 +6,8 @@
 package org.lintx.yinwuchat.bungeecord.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
 import org.java_websocket.WebSocket;
@@ -21,7 +18,7 @@ import org.lintx.yinwuchat.bungeecord.json.ServerMessageJSON;
  * @author jjcbw01
  */
 public class WsClientHelper {
-    private static HashMap<WebSocket,WsClientUtil> clients = new HashMap<WebSocket,WsClientUtil>();
+    private static final HashMap<WebSocket,WsClientUtil> clients = new HashMap<WebSocket,WsClientUtil>();
     
     public static void add(WebSocket socket,WsClientUtil client){
         remove(socket);

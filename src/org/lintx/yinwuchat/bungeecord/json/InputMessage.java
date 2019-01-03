@@ -10,7 +10,7 @@ package org.lintx.yinwuchat.bungeecord.json;
  * @author jjcbw01
  */
 public class InputMessage extends BaseInputJSON{
-    private String message;
+    private final String message;
     
     public String getMessage(){
         return message;

@@ -15,8 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -254,6 +252,5 @@ public class WSServer extends WebSocketServer {
     public void onStart() {
         Yinwuchat.getPlugin().getLogger().info("ws on start");
     }
-    
     
 }

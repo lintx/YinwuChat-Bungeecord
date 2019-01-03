@@ -14,7 +14,7 @@ import java.util.Date;
  * @author jjcbw01
  */
 public class SendMessage {
-    private String action = "send_message";
+    private final String action = "send_message";
     private String player = "";
     private String message = "";
     private String server_name = "";

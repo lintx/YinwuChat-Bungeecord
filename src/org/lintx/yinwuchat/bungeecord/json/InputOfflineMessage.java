@@ -10,7 +10,7 @@ package org.lintx.yinwuchat.bungeecord.json;
  * @author jjcbw01
  */
 public class InputOfflineMessage extends BaseInputJSON{
-    private int last_id;
+    private final int last_id;
     public InputOfflineMessage(int id){
         last_id = id;
     }
