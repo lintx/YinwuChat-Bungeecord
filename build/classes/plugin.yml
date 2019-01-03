@@ -4,15 +4,3 @@ name: YinwuChat-BungeeCord
 main: org.lintx.yinwuchat.bungeecord.Yinwuchat
 version: 0.0.1
 author: LinTx
-commands:
-    yinwuchat:
-        description: YinwuChat Command.
-        usage: |
-            /yinwuchat help
-permissions:
-    yinwuchat.*:
-        default: false
-        children:
-            yinwuchat.reload:
-                description: Allow reload the config
-                default: false
