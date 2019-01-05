@@ -123,7 +123,7 @@ public class WSServer extends WebSocketServer {
                                 String server_name = "WebClient";
                                 ProxiedPlayer toPlayer = Yinwuchat.getPlugin().getProxy().getPlayer(to_player_name);
                                 if (toPlayer!=null && toPlayer instanceof ProxiedPlayer) {
-                                    toPlayer.sendMessage(ChatUtil.formatPrivateMessage(to_player_name, msg));
+                                    toPlayer.sendMessage(ChatUtil.formatPrivateMessage(util.getUuid(), msg));
                                     issend = true;
                                     message_id = Chat2SqlUtil.newMessage(util.getUuid(), toPlayer.getUniqueId(), server_name, msg);
                                 }

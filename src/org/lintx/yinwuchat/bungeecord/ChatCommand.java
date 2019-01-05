@@ -198,7 +198,7 @@ public class ChatCommand extends Command{
                     } catch (Exception e) {
                     }
                     if (toPlayer!=null && toPlayer instanceof ProxiedPlayer) {
-                        toPlayer.sendMessage(ChatUtil.formatPrivateMessage(to_player_name, msg));
+                        toPlayer.sendMessage(ChatUtil.formatPrivateMessage(playerUUID, msg));
                         issend = true;
                         message_id = Chat2SqlUtil.newMessage(playerUUID, toPlayer.getUniqueId(), server_name, msg);
                     }

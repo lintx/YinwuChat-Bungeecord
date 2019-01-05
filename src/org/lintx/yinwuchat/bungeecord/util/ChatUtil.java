@@ -145,7 +145,8 @@ public class ChatUtil {
         return chat;
     }
     
-    public static TextComponent formatPrivateMessage(String player_name,String message){
+    public static TextComponent formatPrivateMessage(UUID playerUUID,String message){
+        String player_name = PlayerUtil.getPlayerName(playerUUID);
         TextComponent chat = new TextComponent();
         
         chat.addExtra(pluginTextComponent());
