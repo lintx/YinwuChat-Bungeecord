@@ -8,9 +8,11 @@ package org.lintx.yinwuchat.bungeecord;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.Date;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -58,16 +60,8 @@ public class Yinwuchat extends Plugin{
     
     private void loadConfig(){
         saveDefaultConfig();
-        stopWsServer();
         
-        int port = getConfig().getInt("websocket.port", 8888);
-        try {
-            server = new WSServer(port);
-            server.start();
-            getLogger().info("WebSocket started on port:" + server.getPort());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        startWs();
         
         token_expire_time = getConfig().getInt("token.expire_time",1296000) * 1000;
         token_max_count = getConfig().getInt("token.player_max_count",5);
@@ -76,6 +70,34 @@ public class Yinwuchat extends Plugin{
         setChatConfig();
         
         clearExpireToken();
+    }
+    
+    private void startWs(){
+        stopWsServer();
+        
+        int port = getConfig().getInt("websocket.port", 8888);
+        if (!isPortAvailable(port)) {
+            getLogger().info(ChatColor.RED+"端口"+port+"被占用，无法开启WebSocket服务，请检查端口绑定情况，或稍后再试，或修改WebSocket端口！");
+            return;
+        }
+        try {
+            server = new WSServer(port);
+            server.start();
+            getLogger().info("WebSocket started on port:" + server.getPort());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private boolean isPortAvailable(int port) {
+        try {
+            ServerSocket server = new ServerSocket(port);
+            server.close();
+            return true;
+        } catch (IOException e) {
+        
+        }
+        return false;
     }
     
     private void clearExpireToken(){
@@ -129,6 +151,7 @@ public class Yinwuchat extends Plugin{
                 getLogger().info("WebSocket stoped");
                 server.stop();
                 server = null;
+                WsClientHelper.clear();
             }
         } catch (Exception e) {
         }
@@ -154,6 +177,14 @@ public class Yinwuchat extends Plugin{
     @Override
     public void onDisable(){
         stopWsServer();
+        try {
+            getProxy().getPluginManager().unregisterCommands(this);
+        } catch (Exception e) {
+        }
+        try {
+            getProxy().getPluginManager().unregisterListeners(this);
+        } catch (Exception e) {
+        }
     }
     
     private void saveDefaultConfig(){

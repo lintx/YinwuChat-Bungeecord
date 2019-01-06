@@ -185,13 +185,12 @@ public class MySql {
                     throw new SQLException("Creating user failed, no ID obtained.");
                 }
             }
-            return last_id;
         } catch (Exception e) {
             e.printStackTrace();
-            return last_id;
         } finally {
             release(conn, ps, null);
         }
+        return last_id;
     }
 
     /**

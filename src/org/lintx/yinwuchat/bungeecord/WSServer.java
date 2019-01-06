@@ -128,7 +128,7 @@ public class WSServer extends WebSocketServer {
                                     message_id = Chat2SqlUtil.newMessage(util.getUuid(), toPlayer.getUniqueId(), server_name, msg);
                                 }
                                 WebSocket ws = WsClientHelper.getWebSocketAsPlayerName(to_player_name);
-                                PrivateMessageJSON msgJSON = new PrivateMessageJSON(util.getPlayerName(), msg, server_name);
+                                PrivateMessageJSON msgJSON = new PrivateMessageJSON(util.getPlayerName(),to_player_name, msg, server_name);
                                 if (ws!=null && ws instanceof WebSocket) {
                                     if (!issend) {
                                         message_id = Chat2SqlUtil.newMessage(util.getUuid(), WsClientHelper.get(ws).getUuid(), server_name, msg);
@@ -217,18 +217,20 @@ public class WSServer extends WebSocketServer {
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("message", (String)m.get("message"));
                     jsonObject.addProperty("server", (String)m.get("server"));
-                    jsonObject.addProperty("player", (String)m.get("player_name"));
                     jsonObject.addProperty("message_id", (int)m.get("id"));
                     jsonObject.addProperty("time", ((Date)m.get("time")).getTime());
                     if ((int)m.get("to_player_id")==0) {
                         jsonObject.addProperty("action", "send_message");
+                        jsonObject.addProperty("player", (String)m.get("player_name"));
                     }
                     else{
                         if ((int)m.get("player_id")==player_id) {
                             jsonObject.addProperty("action", "me_private_message");
+                            jsonObject.addProperty("player", (String)m.get("to_player_name"));
                         }
                         else if ((int)m.get("to_player_id")==player_id) {
                             jsonObject.addProperty("action", "private_message");
+                            jsonObject.addProperty("player", (String)m.get("player_name"));
                         }
                     }
                     jsonArray.add(jsonObject);

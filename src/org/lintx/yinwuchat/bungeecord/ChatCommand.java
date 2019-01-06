@@ -204,7 +204,7 @@ public class ChatCommand extends Command{
                     }
                     WebSocket ws = WsClientHelper.getWebSocketAsPlayerName(to_player_name);
                     if (ws!=null && ws instanceof WebSocket) {
-                        PrivateMessageJSON msgJSON = new PrivateMessageJSON(player.getDisplayName(), msg, server_name);
+                        PrivateMessageJSON msgJSON = new PrivateMessageJSON(player.getDisplayName(),to_player_name, msg, server_name);
                         if (!issend) {
                             message_id = Chat2SqlUtil.newMessage(playerUUID, WsClientHelper.get(ws).getUuid(), server_name, msg);
                         }

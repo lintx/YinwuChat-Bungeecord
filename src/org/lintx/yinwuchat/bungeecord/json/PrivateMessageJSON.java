@@ -17,13 +17,15 @@ public class PrivateMessageJSON {
     private final String action = "private_message";
     private final String me_action = "me_private_message";
     private String player = "";
+    private String to_player = "";
     private String message = "";
     private String server_name = "";
     
-    public PrivateMessageJSON(String player,String message,String server_name){
+    public PrivateMessageJSON(String player,String to_player,String message,String server_name){
         this.player = player;
         this.message = message;
         this.server_name = server_name;
+        this.to_player = to_player;
     }
     
     public String getJSON(int message_id){
@@ -40,7 +42,7 @@ public class PrivateMessageJSON {
     public String getMeJSON(int message_id){
         JsonObject json = new JsonObject();
         json.addProperty("action", me_action);
-        json.addProperty("player", player);
+        json.addProperty("player", to_player);
         json.addProperty("server", server_name);
         json.addProperty("message", message);
         json.addProperty("time", new Date().getTime());
