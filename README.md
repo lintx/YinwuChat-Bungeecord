@@ -12,7 +12,7 @@ YinwuChat-Bungeecord是一个Bungeecord插件，可以将Bungeecord群组服内�
 ### 配置文件
 YinwuChat-Bungeecord的默认配置文件内容为：
 
-```
+```yaml
 message:
     # 玩家在Web客户端向游戏内发送聊天内容时，游戏内玩家所看到的样式
     # 具体样式为identification.text + prefix + player_name + separator + message + suffix
