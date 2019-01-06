@@ -110,6 +110,7 @@ public class Yinwuchat extends Plugin{
     public void reloadConf(){
         getLogger().info("reload config");
         config = null;
+        closeMySql();
         loadConfig();
     }
     
@@ -156,6 +157,15 @@ public class Yinwuchat extends Plugin{
         } catch (Exception e) {
         }
     }
+    
+    private void closeMySql(){
+        try {
+            if (sql!=null) {
+                sql.close();
+            }
+        } catch (Exception e) {
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -177,6 +187,7 @@ public class Yinwuchat extends Plugin{
     @Override
     public void onDisable(){
         stopWsServer();
+        closeMySql();
         try {
             getProxy().getPluginManager().unregisterCommands(this);
         } catch (Exception e) {

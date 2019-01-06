@@ -35,10 +35,31 @@ public class MySql {
     */
     private static int max = 1;
     
+    /**
+     * 是否真的关闭连接
+     */
+    private boolean onClose = false;
+    
     public MySql(String host,int port,String database,String username,String password){
         MySql.db_url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?autoReconnect=true&useSSL=false";
         MySql.username = username;
         MySql.password = password;
+    }
+    
+    public void close(){
+        linkedListClear();
+    }
+    
+    private void linkedListClear(){
+        onClose = true;
+        try {
+            final Connection conn = linkedlist.removeFirst();
+            if (conn!=null) {
+                conn.close();
+                linkedListClear();
+            }
+        } catch (Exception e) {
+        }
     }
     
     public Connection getConnection() throws SQLException {
@@ -79,7 +100,7 @@ public class MySql {
                 conn1.getClass().getInterfaces(), new InvocationHandler() {
                     @Override
                     public Object invoke(Object proxy, Method method,Object[] args) throws Throwable {
-                        if (!method.getName().equalsIgnoreCase("close")) {
+                        if (!method.getName().equalsIgnoreCase("close") || onClose) {
                             return method.invoke(conn1, args);
                         } else {
                             linkedlist.add(conn1);
