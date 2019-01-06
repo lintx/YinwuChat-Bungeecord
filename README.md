@@ -12,7 +12,7 @@ YinwuChat-Bungeecord是一个Bungeecord插件，可以将Bungeecord群组服内�
 ### 配置文件
 YinwuChat-Bungeecord的默认配置文件内容为：
 
-```
+```yaml
 message:
     # 玩家在Web客户端向游戏内发送聊天内容时，游戏内玩家所看到的样式
     # 具体样式为identification.text + prefix + player_name + separator + message + suffix
@@ -62,99 +62,99 @@ mysql:
 本插件所有信息均由WebSocket通信，格式均为JSON格式，具体数据如下：
 #### 发往本插件的数据：
 1. 检查token
-```
+```js
 {
-    "action":"check_token",
-    "token":"待检查的token，token由服务器下发，初次连接时可以使用空字符串"
+    "action": "check_token",
+    "token": "待检查的token，token由服务器下发，初次连接时可以使用空字符串"
 }
 ```
 2. 发送消息
-```
+```js
 {
-    "action":"send_message",
-    "message":"需要发送的消息，注意，格式代码必须使用§"
+    "action": "send_message",
+    "message": "需要发送的消息，注意，格式代码必须使用§"
 }
 ```
 3. 获取历史消息
-```
+```js
 {
-    "action":"offline_message",
-    "last_id":最后一条消息的ID，如从未获取过历史消息，应该为0（没有接收过新消息）或接收到的第一条新消息的id，如已获取过历史消息，则应该是最后一条历史消息id（id最小的那条），数据格式：int
+    "action": "offline_message",
+    "last_id": "最后一条消息的ID，如从未获取过历史消息，应该为0（没有接收过新消息）或接收到的第一条新消息的id，如已获取过历史消息，则应该是最后一条历史消息id（id最小的那条），数据格式：int"
 }
 ```
 
 #### 发往Web客户端的数据：
 1. 更新token（接收到客户端发送的check_token数据，然后检查token失败时下发，收到该数据应提醒玩家在游戏内输入/yinwuchat token title命令绑定token）
-```
+```js
 {
-    "action":"update_token",
-    "token":"一个随机的token"
+    "action": "update_token",
+    "token": "一个随机的token"
 }
 ```
 2. token校验结果（检查token成功后返回，或玩家在游戏内绑定成功后，token对应的WebSocket在线时主动发送，只有接收到了这个数据，且数据中的status为true，且数据中的isbind为true时才可以向服务器发送send_message数据）
-```
+```js
 {
-    "action":"check_token",
-    "status":true/false,        //表示该token是否有效
-    "message":"成功时为success，失败时为原因，并同时发送一个更新token数据",
-    "isbind":false/true         //表示该token是否被玩家绑定
+    "action": "check_token",
+    "status": true/false,        //表示该token是否有效
+    "message": "成功时为success，失败时为原因，并同时发送一个更新token数据",
+    "isbind": false/true         //表示该token是否被玩家绑定
 }
 ```
 3. 玩家在游戏内发送了消息
-```
+```js
 {
-    "action":"send_message",
-    "time":unix时间戳，单位为毫秒（java/JavaScript时间戳）,
-    "player":"玩家名",
-    "server":"服务器名",
-    "message":"消息内容",
+    "action": "send_message",
+    "time": unix时间戳，单位为毫秒（java/JavaScript时间戳）,
+    "player": "玩家名",
+    "server": "服务器名",
+    "message": "消息内容",
     "message_id":消息id(int)
 }
 ```
 4. 玩家登录游戏
-```
+```js
 {
-    "action":"player_join",
-    "player":"玩家名",
-    "server":"服务器名（可能为空）",
-    "time":unix时间戳
+    "action": "player_join",
+    "player": "玩家名",
+    "server": "服务器名（可能为空）",
+    "time": unix时间戳
 }
 ```
 5. 玩家退出游戏
-```
+```js
 {
-    "action":"player_leave",
-    "player":"玩家名",
-    "server":"服务器名（可能为空）",
-    "time":unix时间戳
+    "action": "player_leave",
+    "player": "玩家名",
+    "server": "服务器名（可能为空）",
+    "time": unix时间戳
 }
 ```
 6. 玩家切换服务器
-```
+```js
 {
-    "action":"player_switch_server",
-    "player":"玩家名",
-    "server":"服务器名（可能为空）",
-    "time":unix时间戳
+    "action": "player_switch_server",
+    "player": "玩家名",
+    "server": "服务器名（可能为空）",
+    "time": unix时间戳
 }
 ```
 7. 游戏玩家列表（连接到服务器时、玩家进入游戏时、玩家切换服务器时、玩家退出游戏时发送）
-```
+```js
 {
-    "action":"game_player_list",
+    "action": "game_player_list",
     "player_list":[
         {
-            "player_name":"玩家游戏名",
-            "server_name":"玩家所在服务器"
+            "player_name": "玩家游戏名",
+            "server_name": "玩家所在服务器"
         },
         ……
     ]
 }
 ```
 8. WebClient玩家列表（连接到服务器时、玩家进入WebClient时、玩家退出WebClient时发送）
-```
+```js
 {
-    "action":"web_player_list",
+    "action": "web_player_list",
     "player_list":[
         "玩家名1",
         "玩家名2",
@@ -163,67 +163,69 @@ mysql:
 }
 ```
 9. 私聊消息
-```
+```js
 {
-    "action":"private_message",
-    "player":"玩家名",
-    "server":"玩家所在服务器",
-    "message":"消息内容",
-    "time":unix时间戳",
+    "action": "private_message",
+    "player": "玩家名",
+    "server": "玩家所在服务器",
+    "message": "消息内容",
+    "time": unix时间戳,
     "message_id":消息id(int)
 }
 ```
 10. WebClient玩家登录
-```
+```js
 {
-    "action":"player_web_join",
-    "player":"玩家名",
-    "time":unix时间戳"
+    "action": "player_web_join",
+    "player": "玩家名",
+    "time": unix时间戳
 }
 ```
 11. WebClient玩家断开连接
-```
+```js
 {
-    "action":"player_web_leave",
-    "player":"玩家名",
-    "time":unix时间戳"
+    "action": "player_web_leave",
+    "player": "玩家名",
+    "time": unix时间戳
 }
 ```
 12. 服务器提示消息（一般为和服务器发送数据包后的错误反馈信息）
-```
+```js
 {
-    "action":"server_message",
-    "message":"消息内容",
-    "time":unix时间戳",
-    "status":状态码，详情见下方表格，数据格式：int
+    "action": "server_message",
+    "message": "消息内容",
+    "time": unix时间戳,
+    "status": 状态码，详情见下方表格(int)
 }
 ```
 13.历史消息
-```
+```js
 {
-    "action":"offline_message",
+    "action": "offline_message",
     "messages":[
         {
-            "action":"send_message公开消息/private_message私聊消息/me_private_message我发送的私聊消息",
-            "player":"玩家名",
-            "server":"玩家所在服务器",
-            "message":"消息内容",
-            "time":unix时间戳",
-            "message_id":消息id(int)
+            "action": "send_message 公开消息\
+            private_message 私聊消息\
+            me_private_message 我发送的私聊消息",
+            "player": "玩家名",
+            "server": "玩家所在服务器",
+            "message": "消息内容",
+            "time": unix时间戳,
+            "message_id": 消息id(int)
         },
         ……
     ]
 }
 ```
 14. 我发送的私聊消息
-```
+```js
 {
-    "action":"me_private_message",
-    "player":"玩家名",
-    "server":"玩家所在服务器",
-    "message":"消息内容",
-    "time":unix时间戳",
-    "message_id":消息id(int)
+    "action": "me_private_message",
+    "player": "玩家名",
+    "server": "玩家所在服务器",
+    "message": "消息内容",
+    "time": unix时间戳,
+    "message_id": 消息id(int)
 }
 ```
 
